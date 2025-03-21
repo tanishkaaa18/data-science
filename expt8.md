@@ -1,61 +1,56 @@
-# Feature Selection Using Chi-Square Test on Wine Quality Dataset
+# Wrapper Feature Selection (RFE)
 
-## **Overview**
-This repository demonstrates **filter-based feature selection** using the **Chi-Square test** on the **UCI Wine Quality Dataset**.
+## Overview  
+Feature selection is a crucial step in machine learning that helps improve model performance by eliminating irrelevant or redundant features.  
+This project demonstrates the **Wrapper Feature Selection** technique using **Recursive Feature Elimination (RFE)** with **Logistic Regression**.  
+The goal is to select the top **5 most significant features** from the **Wine Quality Dataset** obtained from the **UCI ML Repository**.  
 
-## **Dataset**
-The dataset used is the **Wine Quality Dataset** from the **UCI ML Repository**.
-It contains **chemical properties** of wine and their corresponding **quality ratings**.
+## Description  
+Recursive Feature Elimination (RFE) is a wrapper method that selects the most relevant features by recursively training a model and eliminating the least important features.  
+In this project, **Logistic Regression** is used as the base model for RFE to determine the most influential features in predicting wine quality.  
 
-- **Source**: [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Wine+Quality)
-- **Features**:
-  - Fixed acidity
-  - Volatile acidity
-  - Citric acid
-  - Residual sugar
-  - Chlorides
-  - Free sulfur dioxide
-  - Total sulfur dioxide
-  - Density
-  - pH
-  - Sulphates
-  - Alcohol
-- **Target Variable**:  
-  - `quality` (Wine quality score between **0 and 10**)
+## How to Use  
+1. Download the dataset and save it in the correct location.  
+2. Copy and run the Python script in your local environment or a Jupyter Notebook.  
+3. Ensure you have installed the required libraries (`pandas`, `sklearn`).  
+4. The script will output the **top 5 selected features**.  
 
-## **Techniques Used**
-1. **Chi-Square Test for Feature Selection**  
-   - Measures the dependence between **features** and **target variable (`quality`)**.  
-   - Selects the **top K features** with the highest dependency on the target.
+# Code  
 
-# code
-### Import necessary libraries
+## Import necessary libraries </br>
 ```
-import pandas as pd
-from sklearn.feature_selection import SelectKBest, chi2
+import pandas as pd </br>
+from sklearn.feature_selection import RFE </br>
+from sklearn.linear_model import LogisticRegression </br>
+from sklearn.model_selection import train_test_split </br>
 ```
-### Load dataset
+## Load dataset 
 ```
-df = pd.read_csv('/content/drive/MyDrive/Datasets/winequality-red.csv', delimiter=';')
+df = pd.read_csv('/content/drive/MyDrive/Datasets/winequality-red.csv', delimiter=';') 
 ```
-### Separate features and target variable
+
+## Separate features and target variable </br>
 ```
-X = df.drop(columns=['quality'])
-y = df['quality']
+X = df.drop(columns=['quality']) 
+y = df['quality'] 
 ```
-### Apply SelectKBest with Chi-Square Test
+
+## Split data into training and testing sets 
 ```
-k = 5  # Select top 5 features
-chi_selector = SelectKBest(score_func=chi2, k=k)
-X_selected = chi_selector.fit_transform(X, y)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) 
 ```
-### Get selected feature names
+## Initialize logistic regression model 
 ```
-selected_feature_indices = chi_selector.get_support(indices=True)
-selected_features = X.columns[selected_feature_indices]
-print("Top", k, "selected features using Chi-Square Test:", selected_features.tolist())
+model = LogisticRegression(max_iter=5000) 
 ```
-## **Installation**
-To run the code, install the required libraries:
-```bash
-pip install pandas scikit-learn
+# Increased max_iter to ensure convergence
+```
+## Apply RFE (Recursive Feature Elimination) to select top 5 features
+rfe = RFE(estimator=model, n_features_to_select=5) 
+X_selected = rfe.fit_transform(X_train, y_train)
+```
+## Get selected feature names
+```
+selected_features = X.columns[rfe.support_] 
+print("Selected Features using RFE:", selected_features.tolist()) 
+```
